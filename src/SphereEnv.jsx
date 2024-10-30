@@ -1,11 +1,12 @@
 import { BackSide, SphereGeometry } from "three";
+import { useTexture } from "@react-three/drei";
 
 export function SphereEnv() {
-    const texture = useLoader(THREE.TextureLoader, '/assets/textures/envmap.hdr')
+    const texture = useTexture('assets/textures/envmap.jpg')
     return (
-        <>
-        <SphereGeometry args={[60,50,50]} />
-        <meshBasicMaterial attach="material" map={texture} side={BackSide} />
-        </>
+        <mesh>
+            <sphereGeometry args={[60, 50, 50]} />
+            <meshBasicMaterial map={texture} side={BackSide} />
+        </mesh>
     )
 }

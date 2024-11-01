@@ -6,8 +6,13 @@ Command: npx gltfjsx@6.5.2 public/assets/models/airplane.glb
 import React, { useRef,useState } from 'react'
 import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { Matrix4,Vector3 } from 'three'
+import { Matrix4,Vector3,Quaternion } from 'three'
+import { updatePlane } from './controls'
 
+
+const x=new Vector3(1,0,0)
+const y=new Vector3(0,1,0)
+const z=new Vector3(0,0,1)
 export const planePostion =new Vector3(0,2,17)
 
 export function Airplane(props) {
@@ -16,28 +21,32 @@ export function Airplane(props) {
   const helixmeshRef = useRef()
   
 
-  const [velocity, setVelocity] = useState(new Vector3(0, 0, -0.02))
+  const [velocity, setVelocity] = useState(new Vector3(0, 0, -0.05))
   useFrame(({camera}) => {
-    // planePostion.add(velocity)
+    updatePlane(x,y,z,planePostion,camera)
+    const rotationMatrix = new Matrix4().makeBasis(x, y, z);
+
 
     const planeMatrix = new Matrix4()
     .makeTranslation(planePostion.x, planePostion.y, planePostion.z)
-    .multiply(new Matrix4().makeRotationY(groupRef.current.rotation.y));
+    .multiply(new Matrix4().makeRotationY(groupRef.current.rotation.y)).multiply(rotationMatrix);
 
   // Apply the plane's transformation to the group
   groupRef.current.matrixAutoUpdate = false;
   groupRef.current.matrix.copy(planeMatrix);
   groupRef.current.matrixWorldNeedsUpdate = true;
 
-  // Create an offset for the camera relative to the plane's position and rotation
-  const cameraOffset = new Vector3(0, 0.08, 0.3); // Adjust as needed
-  const cameraPosition = cameraOffset.applyMatrix4(planeMatrix);
+//   if (helixmeshRef.current) {
+//     helixmeshRef.current.rotation.z += Math.abs(velocity.z) * 20 // Adjust speed multiplier as needed
+//   }
 
-  // Set the camera’s position and rotation
-  camera.position.copy(cameraPosition);
-  camera.lookAt(planePostion);
 
-  camera.matrixWorldNeedsUpdate = true;
+// Set up the camera to follow the plane
+const cameraOffset = new Vector3(0, 0.08, 0.3)
+const cameraPosition = cameraOffset.applyMatrix4(planeMatrix)
+camera.position.copy(cameraPosition)
+camera.lookAt(planePostion)
+camera.matrixWorldNeedsUpdate = true
 
 
   })
